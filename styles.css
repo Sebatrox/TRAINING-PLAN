@@ -1,0 +1,73 @@
+:root {
+  --black: #0a0a0f;
+  --card: #16161f;
+  --red: #e8192c;
+  --text: #e8e8f0;
+  --muted: #7070a0;
+}
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* BODY */
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* HERO */
+.hero {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.tag {
+  color: var(--red);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+}
+
+.red { color: var(--red); }
+.dim { color: var(--muted); }
+
+/* NAV */
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.nav-btn.active {
+  color: var(--red);
+}
+
+/* MAIN */
+.main {
+  padding: 20px;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
