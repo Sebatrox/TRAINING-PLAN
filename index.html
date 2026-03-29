@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Entrenamiento Híbrido</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="tag">Plan Atlético Híbrido · Calistenia Progresiva</div>
+    <h1>ENTRENA<br><span class="red">COMO</span><br><span class="dim">ATLETA</span></h1>
+    <p class="hero-sub">Roberto Gallegos · Eduardo Ledezma — estético, funcional, dominante</p>
+    <div class="stats-row">
+      <div class="stat-chip"><div><span class="label">Peso</span><span class="val">83 kg</span></div></div>
+      <div class="stat-chip"><div><span class="label">Altura</span><span class="val">1.90 m</span></div></div>
+      <div class="stat-chip"><div><span class="label">Edad</span><span class="val">21 años</span></div></div>
+      <div class="stat-chip"><div><span class="label">Nivel</span><span class="val">Intermedio / Regreso</span></div></div>
+    </div>
+    <div class="warning-bar">
+      ⚠️ Rodilla: Rótula luxada hace 2 años. Sin saltos ni impacto alto las primeras 4 semanas.
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showSection('overview')"><span class="dot" style="background:var(--red)"></span>Visión Semanal</button>
+    <button class="nav-btn" onclick="showSection('lunes')">Lunes</button>
+    <button class="nav-btn" onclick="showSection('martes')">Martes</button>
+    <button class="nav-btn" onclick="showSection('miercoles')">Miércoles</button>
+    <button class="nav-btn" onclick="showSection('jueves')">Jueves</button>
+    <button class="nav-btn" onclick="showSection('viernes')">Viernes</button>
+    <button class="nav-btn" onclick="showSection('sabado')">Sábado</button>
+    <button class="nav-btn" onclick="showSection('domingo')">Domingo</button>
+    <button class="nav-btn" onclick="showSection('progresion')">Progresión</button>
+    <button class="nav-btn" onclick="showSection('nutricion')">Nutrición</button>
+    <button class="nav-btn" onclick="showSection('errores')">Errores</button>
+  </div>
+</nav>
+
+<main class="main">
+  <section id="overview" class="section active">
+      </section>
+  
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>
