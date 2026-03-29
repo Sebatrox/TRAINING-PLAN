@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Entrenamiento Híbrido</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0f;
+    --dark: #111118;
+    --card: #16161f;
+    --card2: #1c1c28;
+    --red: #e8192c;
+    --red2: #ff4d5e;
+    --blue: #1e90ff;
+    --green: #00d68f;
+    --orange: #ff8c00;
+    --yellow: #ffd600;
+    --gray: #2a2a38;
+    --gray2: #3a3a50;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --border: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    padding: 60px 40px 40px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(232,25,44,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(30,144,255,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232,25,44,0.15);
+    border: 1px solid rgba(232,25,44,0.3);
+    color: var(--red2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  .tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  h1 span.red { color: var(--red); }
+  h1 span.dim { color: var(--muted); }
+
+  .hero-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin-bottom: 30px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .stat-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .stat-chip .label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; display: block; }
+  .stat-chip .val { color: var(--text); font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+
+  .warning-bar {
+    background: rgba(255,140,0,0.1);
+    border: 1px solid rgba(255,140,0,0.25);
+    border-left: 3px solid var(--orange);
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #ffb347;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    max-width: 700px;
+  }
+
+  /* NAV TABS */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+  }
+
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 16px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--red); border-bottom-color: var(--red); }
+
+  .nav-btn .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* MAIN */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 40px 80px;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* WEEK OVERVIEW */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .day-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .day-card.empuje::before { background: var(--red); }
+  .day-card.tiron::before { background: var(--blue); }
+  .day-card.carrera::before { background: var(--green); }
+  .day-card.empuje2::before { background: var(--red); }
+  .day-card.tiron2::before { background: var(--blue); }
+  .day-card.fullbody::before { background: var(--orange); }
+  .day-card.movilidad::before { background: var(--muted); }
+
+  .day-card:hover { border-color: var(--gray2); transform: translateY(-2px); }
+
+  .day-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .day-focus {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .day-muscles {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .day-num {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gray2);
+  }
+
+  /* EXERCISE TABLE */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .section-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .badge-red { background: rgba(232,25,44,0.15); color: var(--red2); border: 1px solid rgba(232,25,44,0.3); }
+  .badge-blue { background: rgba(30,144,255,0.15); color: #6eb5ff; border: 1px solid rgba(30,144,255,0.3); }
+  .badge-green { background: rgba(0,214,143,0.12); color: var(--green); border: 1px solid rgba(0,214,143,0.3); }
+  .badge-orange { background: rgba(255,140,0,0.12); color: #ffa040; border: 1px solid rgba(255,140,0,0.3); }
+  .badge-gray { background: rgba(112,112,160,0.15); color: var(--muted); border: 1px solid rgba(112,112,160,0.2); }
+
+  .day-note {
+    background: var(--card);
+    border-left: 3px solid var(--gray2);
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+  }
+
+  .ex-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 32px;
+    font-size: 13px;
+  }
+
+  .ex-table th {
+    background: var(--gray);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ex-table th:first-child { border-radius: 6px 0 0 0; }
+  .ex-table th:last-child { border-radius: 0 6px 0 0; }
+
+  .ex-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+
+  .ex-table tr:last-child td { border-bottom: none; }
+
+  .ex-table tr:nth-child(odd) td { background: var(--card); }
+  .ex-table tr:nth-child(even) td { background: var(--card2); }
+
+  .ex-table tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+  .ex-table tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+
+  .ex-name { font-weight: 600; color: var(--text); }
+  .ex-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-left: 6px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+
+  .tag-liga { background: rgba(30,144,255,0.2); color: #6eb5ff; }
+  .tag-core { background: rgba(0,214,143,0.15); color: var(--green); }
+  .tag-rodilla { background: rgba(255,214,0,0.15); color: var(--yellow); }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--red2); font-weight: 700; }
+  .mono-blue { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6eb5ff; font-weight: 700; }
+  .mono-green { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--green); font-weight: 700; }
+  .rest { color: var(--muted); font-size: 12px; }
+  .tip { color: var(--muted); font-size: 12px; font-style: italic; line-height: 1.4; }
+
+  /* PROGRESSION */
+  .prog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .prog-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .prog-level {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .prog-move {
+    margin-bottom: 10px;
+  }
+
+  .prog-move-name {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+  }
+
+  .prog-move-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ROADMAP */
+  .roadmap {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .roadmap::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--red), var(--blue), var(--green), var(--orange));
+  }
+
+  .phase {
+    position: relative;
+    margin-bottom: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+
+  .phase::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 24px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--black);
+  }
+
+  .phase:nth-child(1)::before { background: var(--red); }
+  .phase:nth-child(2)::before { background: var(--blue); }
+  .phase:nth-child(3)::before { background: var(--green); }
+  .phase:nth-child(4)::before { background: var(--orange); }
+
+  .phase-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+  .phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; }
+  .phase-weeks { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .phase-desc { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .phase-goal { font-size: 13px; color: var(--green); font-weight: 600; }
+
+  /* NUTRITION */
+  .macro-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .macro-card {
+    flex: 1;
+    min-width: 130px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .macro-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .macro-cal::after { background: var(--red); }
+  .macro-pro::after { background: var(--blue); }
+  .macro-carb::after { background: var(--orange); }
+  .macro-fat::after { background: var(--yellow); }
+
+  .macro-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 700; }
+  .macro-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; line-height: 1; }
+  .macro-unit { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .meal-section { margin-bottom: 28px; }
+  .meal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    color: var(--muted);
+  }
+
+  .meal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  .meal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .meal-card:hover { border-color: var(--gray2); }
+
+  .meal-name { font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--text); }
+  .meal-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .meal-macros { display: flex; gap: 8px; }
+  .meal-macro { font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 7px; border-radius: 2px; }
+  .mm-kcal { background: rgba(232,25,44,0.15); color: var(--red2); }
+  .mm-pro { background: rgba(30,144,255,0.15); color: #6eb5ff; }
+
+  /* ERRORS */
+  .errors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .error-card {
+    background: var(--card);
+    border: 1px solid rgba(232,25,44,0.15);
+    border-left: 3px solid var(--red);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+
+  .error-name { font-weight: 700; font-size: 13px; color: var(--red2); margin-bottom: 4px; }
+  .error-why { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .prog-grid { grid-template-columns: 1fr; }
+    .meal-grid { grid-template-columns: 1fr; }
+    .errors-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 48px; }
+    .hero, .main, .nav { padding-left: 20px; padding-right: 20px; }
+  }
+
+  @media (max-width: 600px) {
+    .week-grid { grid-template-columns: repeat(2, 1fr); }
+    .macro-bar { flex-direction: column; }
+    .ex-table { font-size: 11px; }
+    .ex-table td, .ex-table th { padding: 8px 10px; }
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .check-row::before {
+    content: '→';
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="tag">Plan Atlético Híbrido · Calistenia Progresiva</div>
+    <h1>
+      ENTRENA<br>
+      <span class="red">COMO</span><br>
+      <span class="dim">ATLETA</span>
+    </h1>
+    <p class="hero-sub">Roberto Gallegos · Eduardo Ledezma — estético, funcional, dominante</p>
+    <div class="stats-row">
+      <div class="stat-chip">
+        <div><span class="label">Peso</span><span class="val">83 kg</span></div>
+      </div>
+      <div class="stat-chip">
+        <div><span class="label">Altura</span><span class="val">1.90 m</span></div>
+      </div>
+      <div class="stat-chip">
+        <div><span class="label">Edad</span><span class="val">21 años</span></div>
+      </div>
+      <div class="stat-chip">
+        <div><span class="label">Nivel</span><span class="val">Intermedio / Regreso</span></div>
+      </div>
+      <div class="stat-chip">
+        <div><span class="label">Equipo</span><span class="val">Barra + Ligas</span></div>
+      </div>
+    </div>
+    <div class="warning-bar">
+      ⚠️ Rodilla: Rótula luxada hace 2 años. Sin saltos ni impacto alto las primeras 4 semanas. La progresión protege la articulación.
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showSection('overview')"><span class="dot" style="background:var(--red)"></span>Visión Semanal</button>
+    <button class="nav-btn" onclick="showSection('lunes')"><span class="dot" style="background:var(--red)"></span>Lunes</button>
+    <button class="nav-btn" onclick="showSection('martes')"><span class="dot" style="background:var(--blue)"></span>Martes</button>
+    <button class="nav-btn" onclick="showSection('miercoles')"><span class="dot" style="background:var(--green)"></span>Miércoles</button>
+    <button class="nav-btn" onclick="showSection('jueves')"><span class="dot" style="background:var(--red)"></span>Jueves</button>
+    <button class="nav-btn" onclick="showSection('viernes')"><span class="dot" style="background:var(--blue)"></span>Viernes</button>
+    <button class="nav-btn" onclick="showSection('sabado')"><span class="dot" style="background:var(--orange)"></span>Sábado</button>
+    <button class="nav-btn" onclick="showSection('domingo')"><span class="dot" style="background:var(--muted)"></span>Domingo</button>
+    <button class="nav-btn" onclick="showSection('progresion')"><span class="dot" style="background:var(--yellow)"></span>Progresión</button>
+    <button class="nav-btn" onclick="showSection('nutricion')"><span class="dot" style="background:var(--green)"></span>Nutrición</button>
+    <button class="nav-btn" onclick="showSection('errores')"><span class="dot" style="background:var(--red)"></span>Errores</button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <section id="overview" class="section active">
+    <div class="section-header">
+      <div class="section-title">SEMANA TIPO</div>
+    </div>
+    <div class="week-grid">
+      <div class="day-card empuje" onclick="showSection('lunes')">
+        <div class="day-num">01</div>
+        <div class="day-name" style="color:var(--red)">Lunes</div>
+        <div class="day-focus" style="color:var(--red)">Empuje</div>
+        <div class="day-muscles">Pecho · Hombros · Tríceps</div>
+      </div>
+      <div class="day-card tiron" onclick="showSection('martes')">
+        <div class="day-num">02</div>
+        <div class="day-name" style="color:#6eb5ff">Martes</div>
+        <div class="day-focus" style="color:#6eb5ff">Tirón + Core</div>
+        <div class="day-muscles">Espalda · Bíceps · Abdomen</div>
+      </div>
+      <div class="day-card carrera" onclick="showSection('miercoles')">
+        <div class="day-num">03</div>
+        <div class="day-name" style="color:var(--green)">Miérc.</div>
+        <div class="day-focus" style="color:var(--green)">Carrera + Rodilla</div>
+        <div class="day-muscles">Cardio · Rehab rótula</div>
+      </div>
+      <div class="day-card empuje2" onclick="showSection('jueves')">
+        <div class="day-num">04</div>
+        <div class="day-name" style="color:var(--red)">Jueves</div>
+        <div class="day-focus" style="color:var(--red)">Empuje Avanzado</div>
+        <div class="day-muscles">Potencia · Core profundo</div>
+      </div>
+      <div class="day-card tiron2" onclick="showSection('viernes')">
+        <div class="day-num">05</div>
+        <div class="day-name" style="color:#6eb5ff">Viernes</div>
+        <div class="day-focus" style="color:#6eb5ff">Tirón + Pierna</div>
+        <div class="day-muscles">Espalda · Glúteo · Isquios</div>
+      </div>
+      <div class="day-card fullbody" onclick="showSection('sabado')">
+        <div class="day-num">06</div>
+        <div class="day-name" style="color:var(--orange)">Sábado</div>
+        <div class="day-focus" style="color:var(--orange)">Full Body</div>
+        <div class="day-muscles">Circuito + 20 min trote</div>
+      </div>
+      <div class="day-card movilidad" onclick="showSection('domingo')">
+        <div class="day-num">07</div>
+        <div class="day-name" style="color:var(--muted)">Domingo</div>
+        <div class="day-focus" style="color:var(--muted)">Movilidad</div>
+        <div class="day-muscles">Stretching · Recuperación</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-header">
+      <div class="section-title">USO DE LIGAS</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;">
+      <div class="phase" style="margin-bottom:0">
+        <div class="phase-header">
+          <div class="phase-title" style="color:#6eb5ff">DOMINADAS CON LIGA</div>
+        </div>
+        <div class="check-row">Pon la liga en la barra y mete <strong>una rodilla</strong> — más control que el pie</div>
+        <div class="check-row">Liga más gruesa = menos esfuerzo. Empieza con la que te permita 6-8 reps limpias</div>
+        <div class="check-row">Cada 3-4 semanas <strong>baja un grosor</strong> de liga</div>
+        <div class="check-row">Combínalas con <strong>negativas sin liga</strong> (bajas solo en 5 seg)</div>
+        <div class="check-row">Meta: 3 dominadas sin liga en semana 6-8</div>
+      </div>
+      <div class="phase" style="margin-bottom:0">
+        <div class="phase-header">
+          <div class="phase-title" style="color:var(--red)">LAGARTIJAS CON LIGA</div>
+        </div>
+        <div class="check-row">Pasa la liga por algo fijo detrás (puerta, argolla) al nivel del pecho</div>
+        <div class="check-row">Apoya el pecho contra la liga — amortigua el punto de mayor dificultad (fondo)</div>
+        <div class="check-row">Útil para <strong>Pike push-ups</strong> y <strong>fondos</strong> también</div>
+        <div class="check-row">Cuando hagas todas las reps con liga cómodamente → quita la liga</div>
+        <div class="check-row">Las lagartijas con liga construyen el patrón antes que la fuerza</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LUNES -->
+  <section id="lunes" class="section">
+    <div class="section-header">
+      <div class="section-title">LUNES</div>
+      <span class="section-badge badge-red">EMPUJE</span>
+    </div>
+    <div class="day-note">Calentamiento 10 min: rotación de hombros, arm circles, 10 lagartijas de rodilla, movimiento de muñecas.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th style="width:30%">Ejercicio</th>
+          <th>Series</th>
+          <th>Reps</th>
+          <th>Descanso</th>
+          <th>Tip de técnica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Lagartijas Estándar</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">4</span></td>
+          <td><span class="mono">15</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Cuerpo recto, codos 45°, pecho al suelo. Si falla la forma → usa liga</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Lagartijas Inclinadas (pies en silla)</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">12</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">Pecho alto y hombros anteriores. Pies más altos = más difícil</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Pike Push-Up</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">4</span></td>
+          <td><span class="mono">10</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">Cadera en V invertida, cabeza baja al suelo. Tu ejercicio de hombros — el V-taper empieza aquí</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Fondos en Silla</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">4</span></td>
+          <td><span class="mono">12</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Espalda pegada a la silla, codos apuntan hacia atrás. Liga bajo el cuerpo si necesitas apoyo</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Lagartijas Diamante</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">10</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Manos en diamante bajo el pecho, codos muy pegados. Tríceps al 100%</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Plancha Frontal</span> <span class="ex-tag tag-core">core</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">45 seg</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Glúteo apretado, no dejes caer las caderas. Respira. No se negocia la forma</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- MARTES -->
+  <section id="martes" class="section">
+    <div class="section-header">
+      <div class="section-title">MARTES</div>
+      <span class="section-badge badge-blue">TIRÓN + CORE</span>
+    </div>
+    <div class="day-note">La barra es innegociable para el V-taper. Las negativas son tu herramienta #1 para progresar. Sin ellas no hay dominadas.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th style="width:30%">Ejercicio</th>
+          <th>Series</th>
+          <th>Reps</th>
+          <th>Descanso</th>
+          <th>Tip de técnica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Dominadas con Liga — Agarre Ancho</span> <span class="ex-tag tag-liga">liga</span></td>
+          <td><span class="mono-blue">5</span></td>
+          <td><span class="mono-blue">6-8</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">Rodilla en la liga. Jala los codos hacia las caderas, no hacia abajo. Pecho al frente arriba</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Dominadas Supinas con Liga</span> <span class="ex-tag tag-liga">liga</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">6-8</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">Palmas hacia ti, ancho de hombros. Siente bíceps Y espalda trabajando juntos</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Remo Invertido (Australian Pull-Up)</span></td>
+          <td><span class="mono-blue">4</span></td>
+          <td><span class="mono-blue">12</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Barra baja, cuerpo recto colgado, jala el pecho a la barra. Pies adelante = más difícil</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Dominadas Negativas — SIN Liga</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">5</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">Silla para subir, luego baja en exactamente 5 segundos. Esto te da dominadas en 6 semanas</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Elevaciones de Pierna Colgado</span> <span class="ex-tag tag-core">core</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">10</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Sin balanceo. El core trabaja, no el impulso. Piernas rectas si puedes</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Hollow Body Hold</span> <span class="ex-tag tag-core">core</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">30 seg</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Espalda baja pegada al suelo siempre. Brazos y piernas al ras. El core más funcional que existe</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- MIERCOLES -->
+  <section id="miercoles" class="section">
+    <div class="section-header">
+      <div class="section-title">MIÉRCOLES</div>
+      <span class="section-badge badge-green">CARRERA + RODILLA</span>
+    </div>
+    <div class="day-note">Zona 2: puedes mantener una conversación mientras corres. No es un día fácil — es un día diferente. La rodilla se fortalece con estímulo correcto.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th style="width:30%">Ejercicio</th>
+          <th>Series</th>
+          <th>Duración / Reps</th>
+          <th>Descanso</th>
+          <th>Tip de técnica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Trote suave Zona 2</span></td>
+          <td><span class="mono-green">1</span></td>
+          <td><span class="mono-green">Sem 1-2: 25 min · Sem 3+: 35 min</span></td>
+          <td><span class="rest">—</span></td>
+          <td class="tip">Ritmo conversacional. Si jadeas, camina. El cardio base construye el motor atlético</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Sentadilla Isométrica en Pared (Wall Sit)</span> <span class="ex-tag tag-rodilla">rodilla</span></td>
+          <td><span class="mono-green">3</span></td>
+          <td><span class="mono-green">45 seg</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Rodillas a 90°. Fortalece el VMO (músculo que estabiliza tu rótula). Tu medicina</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Elevación de Pierna Recta</span> <span class="ex-tag tag-rodilla">rodilla</span></td>
+          <td><span class="mono-green">3</span></td>
+          <td><span class="mono-green">15 c/lado</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Acostado, pierna recta sube a 45°, baja lento. Activa cuádriceps sin comprimir la rótula</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Puente de Glúteo</span> <span class="ex-tag tag-rodilla">rodilla</span></td>
+          <td><span class="mono-green">3</span></td>
+          <td><span class="mono-green">20</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Cadera arriba, glúteo apretado arriba. El glúteo fuerte descarga la rodilla en todo movimiento</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- JUEVES -->
+  <section id="jueves" class="section">
+    <div class="section-header">
+      <div class="section-title">JUEVES</div>
+      <span class="section-badge badge-red">EMPUJE AVANZADO + CORE</span>
+    </div>
+    <div class="day-note">Más intenso que el lunes. El dragon flag negativo es el ejercicio de core más exigente de la calistenia. Tómatelo en serio.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th style="width:30%">Ejercicio</th>
+          <th>Series</th>
+          <th>Reps</th>
+          <th>Descanso</th>
+          <th>Tip de técnica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Lagartijas Explosivas</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">4</span></td>
+          <td><span class="mono">8</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">Empuja fuerte, palmas se despegan. Si aún no puedes, hazlas con intención explosiva. Liga ayuda en el fondo</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Pike Push-Up Avanzado</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">4</span></td>
+          <td><span class="mono">10</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">Más vertical que el lunes. Pies más altos o más cerca. Hombros al máximo</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Lagartijas Declinadas</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">12</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Pies en silla o cama, manos en suelo. Pecho superior y hombros. Cuerpo recto siempre</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Fondos con Pausa 2 seg</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">10</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">La pausa elimina el rebote. Máxima tensión muscular. Liga bajo el cuerpo para asistencia</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Ab Wheel / Lagartija de Core</span> <span class="ex-tag tag-core">core</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">8</span></td>
+          <td><span class="rest">60 seg</span></td>
+          <td class="tip">Sin rueda: desde plancha, desliza manos al frente máximo posible. Mismo efecto</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Plancha Lateral</span> <span class="ex-tag tag-core">core</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">35 seg c/lado</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Cadera arriba, cuerpo lateral recto. Oblicuos y cuadrado lumbar. Estabilizadores del torso</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Dragon Flag Negativo</span> <span class="ex-tag tag-core">core</span></td>
+          <td><span class="mono">3</span></td>
+          <td><span class="mono">5</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">Agárrate detrás de la cabeza (silla/cama), sube las piernas rectas y baja MUY lento. Cuerpo como bandera</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- VIERNES -->
+  <section id="viernes" class="section">
+    <div class="section-header">
+      <div class="section-title">VIERNES</div>
+      <span class="section-badge badge-blue">TIRÓN AVANZADO + PIERNA</span>
+    </div>
+    <div class="day-note">Pierna 100% segura para tu rótula. Búlgara y peso muerto a 1 pierna son los mejores ejercicios sin compresión directa en la articulación.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th style="width:30%">Ejercicio</th>
+          <th>Series</th>
+          <th>Reps</th>
+          <th>Descanso</th>
+          <th>Tip de técnica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Dominadas Tempo 3-3</span> <span class="ex-tag tag-liga">liga</span></td>
+          <td><span class="mono-blue">4</span></td>
+          <td><span class="mono-blue">5-8</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">3 seg subida, 3 seg bajada. Liga más delgada que el martes. Fuerza real, no velocidad</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Dominadas Negativas Largas</span></td>
+          <td><span class="mono-blue">4</span></td>
+          <td><span class="mono-blue">5</span></td>
+          <td><span class="rest">90 seg</span></td>
+          <td class="tip">Sin liga. Baja en 5-6 segundos. Máximo constructor de fuerza en tirón. No lo saltes</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Remo Invertido con Pausa 1 seg</span></td>
+          <td><span class="mono-blue">4</span></td>
+          <td><span class="mono-blue">10</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">Pausa arriba: siente omóplatos juntos. Retracción escapular = espalda ancha y sana</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Sentadilla Búlgara</span> <span class="ex-tag tag-rodilla">segura</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">8 c/lado</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">Pie trasero en silla, baja lento. Rodilla delantera no pasa la punta del pie. Sin dolor</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Peso Muerto a Una Pierna</span> <span class="ex-tag tag-rodilla">segura</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">10 c/lado</span></td>
+          <td><span class="rest">75 seg</span></td>
+          <td class="tip">Espalda recta, pierna libre hacia atrás. Fortalece isquios, glúteo y estabilizadores de rodilla</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Puente Glúteo Unilateral</span> <span class="ex-tag tag-rodilla">segura</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">15 c/lado</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Una pierna extendida. El glúteo fuerte es el mayor protector de la rodilla</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Gemelo Unilateral</span></td>
+          <td><span class="mono-blue">3</span></td>
+          <td><span class="mono-blue">20 c/lado</span></td>
+          <td><span class="rest">45 seg</span></td>
+          <td class="tip">Sube lento, baja lento. Estabilidad de tobillo = estabilidad de rodilla</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SABADO -->
+  <section id="sabado" class="section">
+    <div class="section-header">
+      <div class="section-title">SÁBADO</div>
+      <span class="section-badge badge-orange">FULL BODY + CARRERA</span>
+    </div>
+    <div class="day-note">Circuito sin pausa entre ejercicios. 4 rondas completas con 90 seg de descanso entre rondas. Brutal, rápido, efectivo.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th>Orden en el Circuito</th>
+          <th>Ejercicio</th>
+          <th>Trabajo</th>
+          <th>Descanso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">01</span></td>
+          <td><span class="ex-name">Lagartijas Estándar</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">02</span></td>
+          <td><span class="ex-name">Dominadas con Liga</span> <span class="ex-tag tag-liga">liga</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">03</span></td>
+          <td><span class="ex-name">Sentadilla Búlgara</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">04</span></td>
+          <td><span class="ex-name">Fondos en Silla</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">05</span></td>
+          <td><span class="ex-name">Plancha Frontal</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">06</span></td>
+          <td><span class="ex-name">Elevaciones de Pierna Colgado</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">07</span></td>
+          <td><span class="ex-name">Pike Push-Up</span> <span class="ex-tag tag-liga">liga opt.</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest">20 seg → siguiente</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--orange)">08</span></td>
+          <td><span class="ex-name">Remo Invertido</span></td>
+          <td><span class="mono">40 seg</span></td>
+          <td><span class="rest" style="color:var(--orange);font-weight:700">90 seg entre rondas</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono" style="color:var(--green)">FIN</span></td>
+          <td><span class="ex-name">Trote continuo post-circuito</span></td>
+          <td><span class="mono-green">20 min</span></td>
+          <td><span class="rest">Ya estás caliente del circuito</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- DOMINGO -->
+  <section id="domingo" class="section">
+    <div class="section-header">
+      <div class="section-title">DOMINGO</div>
+      <span class="section-badge badge-gray">MOVILIDAD ACTIVA</span>
+    </div>
+    <div class="day-note">No es descanso total — es inversión en tu cuerpo a largo plazo. Los músculos crecen mientras te recuperas, no mientras entrenas.</div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th>Actividad</th>
+          <th>Duración</th>
+          <th>Enfoque</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Stretching completo</span></td>
+          <td><span class="mono" style="color:var(--muted)">20 min</span></td>
+          <td class="tip">Todo el cuerpo. Mantén cada posición 30-45 seg. Sin dolor, solo tensión suave</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Movilidad de cadera y rodilla</span> <span class="ex-tag tag-rodilla">rodilla</span></td>
+          <td><span class="mono" style="color:var(--muted)">10 min</span></td>
+          <td class="tip">Rotaciones de cadera, flexión/extensión de rodilla controlada, tobillo. Específico para tu lesión</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Respiración diafragmática</span></td>
+          <td><span class="mono" style="color:var(--muted)">5 min</span></td>
+          <td class="tip">Baja el cortisol, mejora la recuperación. Inhala 4 seg, retén 4, exhala 6</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Caminata activa</span></td>
+          <td><span class="mono" style="color:var(--muted)">20-30 min</span></td>
+          <td class="tip">Ritmo tranquilo al aire libre. Circulación activa = recuperación más rápida</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- PROGRESION -->
+  <section id="progresion" class="section">
+    <div class="section-header">
+      <div class="section-title">PROGRESIÓN</div>
+    </div>
+    <div class="day-note">Regla de oro: completas todas las series y reps con buena técnica 2 semanas seguidas → subes al siguiente nivel. Sin excepciones.</div>
+
+    <div class="prog-grid">
+      <div class="prog-card">
+        <div class="prog-level" style="color:var(--orange)">NIVEL 1 · Ahora (Sem 1-4)</div>
+        <div class="prog-move"><div class="prog-move-name">Lagartijas</div><div class="prog-move-val">Estándar 4×15 <span style="color:var(--muted);font-size:12px">+ liga si falla forma</span></div></div>
+        <div class="prog-move"><div class="prog-move-name">Dominadas</div><div class="prog-move-val">Liga gruesa + Negativas 5 seg</div></div>
+        <div class="prog-move"><div class="prog-move-name">Fondos</div><div class="prog-move-val">Silla 4×12 + liga opt.</div></div>
+        <div class="prog-move"><div class="prog-move-name">Core</div><div class="prog-move-val">Plancha 45 seg · Hollow Body 30 seg</div></div>
+        <div class="prog-move"><div class="prog-move-name">Pierna</div><div class="prog-move-val">Búlgara lenta sin peso</div></div>
+        <div class="prog-move"><div class="prog-move-name">Cardio</div><div class="prog-move-val">25 min trote suave</div></div>
+      </div>
+      <div class="prog-card" style="border-color:rgba(232,25,44,0.2)">
+        <div class="prog-level" style="color:var(--red)">NIVEL 2 · Construcción (Sem 5-10)</div>
+        <div class="prog-move"><div class="prog-move-name">Lagartijas</div><div class="prog-move-val">Diamante · Arquera · Sin liga</div></div>
+        <div class="prog-move"><div class="prog-move-name">Dominadas</div><div class="prog-move-val">Liga delgada → 3 sin liga</div></div>
+        <div class="prog-move"><div class="prog-move-name">Fondos</div><div class="prog-move-val">Con pausa 2 seg · Sin liga</div></div>
+        <div class="prog-move"><div class="prog-move-name">Core</div><div class="prog-move-val">Ab Wheel · Dragon Flag neg.</div></div>
+        <div class="prog-move"><div class="prog-move-name">Pierna</div><div class="prog-move-val">Búlgara con mochila de peso</div></div>
+        <div class="prog-move"><div class="prog-move-name">Cardio</div><div class="prog-move-val">35 min trote continuo</div></div>
+      </div>
+      <div class="prog-card" style="border-color:rgba(0,214,143,0.2)">
+        <div class="prog-level" style="color:var(--green)">NIVEL 3 · Atlético (Sem 11+)</div>
+        <div class="prog-move"><div class="prog-move-name">Lagartijas</div><div class="prog-move-val">Explosiva · Arquera · Un brazo</div></div>
+        <div class="prog-move"><div class="prog-move-name">Dominadas</div><div class="prog-move-val">10 limpias · L-sit · Arquera</div></div>
+        <div class="prog-move"><div class="prog-move-name">Fondos</div><div class="prog-move-val">Con mochila pesada</div></div>
+        <div class="prog-move"><div class="prog-move-name">Core</div><div class="prog-move-val">Dragon Flag completo · Planche lean</div></div>
+        <div class="prog-move"><div class="prog-move-name">Pierna</div><div class="prog-move-val">Pistol squat progresión</div></div>
+        <div class="prog-move"><div class="prog-move-name">Cardio</div><div class="prog-move-val">45 min + intervalos</div></div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:32px">
+      <div class="section-title" style="font-size:32px">HOJA DE RUTA</div>
+    </div>
+    <div class="roadmap">
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-title" style="color:var(--red)">FASE 1 — BASE</div>
+          <div class="phase-weeks">Semanas 1-4</div>
+        </div>
+        <div class="phase-desc">Recuperar movilidad, instalar el hábito diario, proteger y fortalecer la rodilla progresivamente.</div>
+        <div class="phase-goal">✓ Completar 7 días seguidos sin dolor · Dominar la técnica base</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-title" style="color:var(--blue)">FASE 2 — CONSTRUCCIÓN</div>
+          <div class="phase-weeks">Semanas 5-10</div>
+        </div>
+        <div class="phase-desc">Ganar masa muscular visible. Reducir dependencia de las ligas. El V-taper empieza a aparecer.</div>
+        <div class="phase-goal">✓ 3 dominadas sin liga · +5 lagartijas por serie · Masa visible en espalda y hombros</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-title" style="color:var(--green)">FASE 3 — INTENSIFICACIÓN</div>
+          <div class="phase-weeks">Semanas 11-16</div>
+        </div>
+        <div class="phase-desc">Progresiones avanzadas. Definición muscular. Rendimiento físico notablemente superior.</div>
+        <div class="phase-goal">✓ 10 dominadas limpias · Dragon flag completo · Definición clara</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-title" style="color:var(--orange)">FASE 4 — ATLÉTICO HÍBRIDO</div>
+          <div class="phase-weeks">Semana 17 en adelante</div>
+        </div>
+        <div class="phase-desc">Físico completo: estético + funcional + rendimiento. El objetivo final cumplido.</div>
+        <div class="phase-goal">✓ Correr 45 min + dominar peso corporal avanzado + físico híbrido visible</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUTRICION -->
+  <section id="nutricion" class="section">
+    <div class="section-header">
+      <div class="section-title">NUTRICIÓN</div>
+      <span class="section-badge badge-green">VOLUMEN LIMPIO</span>
+    </div>
+    <div class="day-note">Con tu alimentación desordenada, el primer objetivo es simple: estructura 3-4 comidas al día con proteína en cada una. Solo eso ya transforma el cuerpo.</div>
+
+    <div class="macro-bar">
+      <div class="macro-card macro-cal">
+        <div class="macro-label">Calorías diarias</div>
+        <div class="macro-val" style="color:var(--red)">3,100</div>
+        <div class="macro-unit">kcal objetivo</div>
+      </div>
+      <div class="macro-card macro-pro">
+        <div class="macro-label">Proteína</div>
+        <div class="macro-val" style="color:#6eb5ff">170g</div>
+        <div class="macro-unit">2g por kg de peso</div>
+      </div>
+      <div class="macro-card macro-carb">
+        <div class="macro-label">Carbohidratos</div>
+        <div class="macro-val" style="color:var(--orange)">390g</div>
+        <div class="macro-unit">combustible y músculo</div>
+      </div>
+      <div class="macro-card macro-fat">
+        <div class="macro-label">Grasas</div>
+        <div class="macro-val" style="color:var(--yellow)">85g</div>
+        <div class="macro-unit">hormonas y recuperación</div>
+      </div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-title">☀️ DESAYUNOS</div>
+      <div class="meal-grid">
+        <div class="meal-card">
+          <div class="meal-name">Clásico proteico</div>
+          <div class="meal-desc">4 huevos revueltos + 2 tortillas de maíz + salsa + 1 vaso de leche entera</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~550 kcal</span>
+            <span class="meal-macro mm-pro">38g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Avena atlética</div>
+          <div class="meal-desc">1 taza avena + 1 taza leche + plátano + 1 cda crema cacahuate + 2 huevos</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~620 kcal</span>
+            <span class="meal-macro mm-pro">35g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Ultra rápido</div>
+          <div class="meal-desc">3 huevos + 2 rebanadas pan integral + 1 lata de atún + café</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~500 kcal</span>
+            <span class="meal-macro mm-pro">42g prot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-title">🍛 ALMUERZOS</div>
+      <div class="meal-grid">
+        <div class="meal-card">
+          <div class="meal-name">Clásico mexicano</div>
+          <div class="meal-desc">150g pollo a la plancha + arroz integral + frijoles de olla + verduras salteadas</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~700 kcal</span>
+            <span class="meal-macro mm-pro">52g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Económico y completo</div>
+          <div class="meal-desc">3 huevos + frijoles de olla + 3 tortillas + ¼ aguacate + salsa</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~650 kcal</span>
+            <span class="meal-macro mm-pro">38g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Pasta atlética</div>
+          <div class="meal-desc">200g pasta cocida + 2 latas de atún + jitomate + aceite de oliva + orégano</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~720 kcal</span>
+            <span class="meal-macro mm-pro">50g prot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-title">🌙 CENAS</div>
+      <div class="meal-grid">
+        <div class="meal-card">
+          <div class="meal-name">Ligera y proteica</div>
+          <div class="meal-desc">150g pollo o pescado a la plancha + ensalada grande + 1 tortilla</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~450 kcal</span>
+            <span class="meal-macro mm-pro">38g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Omelette nocturno</div>
+          <div class="meal-desc">4 huevos + espinacas + queso Oaxaca + pan tostado integral</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~480 kcal</span>
+            <span class="meal-macro mm-pro">34g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Sopa de potencia</div>
+          <div class="meal-desc">Sopa de lentejas + pollo desmenuzado + verduras de temporada</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~500 kcal</span>
+            <span class="meal-macro mm-pro">36g prot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-title">⚡ SNACKS</div>
+      <div class="meal-grid">
+        <div class="meal-card">
+          <div class="meal-name">Licuado de construcción</div>
+          <div class="meal-desc">Leche + avena + plátano + 2 huevos crudos + cda crema cacahuate</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~450 kcal</span>
+            <span class="meal-macro mm-pro">28g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Atún rápido</div>
+          <div class="meal-desc">1 lata de atún + galletas integrales + pizca de limón</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~220 kcal</span>
+            <span class="meal-macro mm-pro">25g prot</span>
+          </div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-name">Requesón + fruta</div>
+          <div class="meal-desc">1 taza requesón + fruta de temporada (mango, plátano, papaya)</div>
+          <div class="meal-macros">
+            <span class="meal-macro mm-kcal">~200 kcal</span>
+            <span class="meal-macro mm-pro">20g prot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ERRORES -->
+  <section id="errores" class="section">
+    <div class="section-header">
+      <div class="section-title">ERRORES FATALES</div>
+    </div>
+    <div class="day-note">Estos errores destruyen el 80% del progreso de la gente. Léelos, memorízalos, evítalos.</div>
+    <div class="errors-grid">
+      <div class="error-card">
+        <div class="error-name">Saltarte el desayuno</div>
+        <div class="error-why">Sin combustible el músculo se degrada durante el entrenamiento. No hay construcción sin materia prima.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">No comer proteína en cada comida</div>
+        <div class="error-why">Es el material de construcción muscular. Sin 170g diarios distribuidos no hay hipertrofia real.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">Progresar demasiado rápido en pierna</div>
+        <div class="error-why">Tu rótula necesita adaptación progresiva. Forzar la pierna en las primeras semanas puede relesionarte.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">Obsesionarte con la báscula</div>
+        <div class="error-why">El peso varía 1-2 kg diario por agua, comida y sal. Mídete en fotos y rendimiento, no en números.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">Entrenar sin estructura</div>
+        <div class="error-why">El progreso viene del estímulo sistemático y progresivo, no del caos aleatorio. Sigue el plan.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">Ignorar el tirón (dominadas)</div>
+        <div class="error-why">El V-taper se construye con espalda ancha, no con lagartijas. El tirón es igual de importante que el empuje.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">Quemar el miércoles y domingo</div>
+        <div class="error-why">La recuperación activa es donde el músculo crece. Sin recuperación no hay supercompensación.</div>
+      </div>
+      <div class="error-card">
+        <div class="error-name">Depender siempre de la liga</div>
+        <div class="error-why">La liga es una herramienta, no un destino. Las negativas sin liga deben estar en tu plan siempre para salir de ella.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-header">
+      <div class="section-title" style="font-size:32px">MIDE TU PROGRESO</div>
+    </div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th>Métrica</th>
+          <th>Cuándo</th>
+          <th>Cómo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ex-name">Fotos</span></td>
+          <td><span class="mono-green">Cada 2 semanas</span></td>
+          <td class="tip">Frontal + lateral + espalda. Misma hora (mañana), misma luz. Las fotos no mienten</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Rendimiento</span></td>
+          <td><span class="mono-green">Cada 2 semanas</span></td>
+          <td class="tip">Test máximo de dominadas y lagartijas. ¿Más que hace 2 semanas? Estás progresando</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Peso corporal</span></td>
+          <td><span class="mono-green">1 vez por semana</span></td>
+          <td class="tip">En ayunas, mismo día. Solo mira la tendencia a largo plazo, no el número diario</td>
+        </tr>
+        <tr>
+          <td><span class="ex-name">Energía y sueño</span></td>
+          <td><span class="mono-green">Diario</span></td>
+          <td class="tip">¿Te sientes bien? ¿Duermes bien? Son los mejores indicadores de que el plan funciona</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const map = ['overview','lunes','martes','miercoles','jueves','viernes','sabado','domingo','progresion','nutricion','errores'];
+  btns[map.indexOf(id)].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
